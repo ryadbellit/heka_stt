@@ -5,7 +5,7 @@ import os
 #from util import SENTENCES
 
 # --- Configuration ---
-FS = 44100  # Sample rate (standard for high quality)
+FS = 16000  # Sample rate (standard for high quality)
 DURATION = 10  # Seconds per recording
 OUTPUT_DIR = "dataset_audio"
 
@@ -19,12 +19,13 @@ if not os.path.exists(OUTPUT_DIR):
 def record_session():
     print(f"--- Audio Collection Started ---")
     print(f"Goal: {len(SENTENCES)} sentences (~{len(SENTENCES) * DURATION / 60:.1f} minutes total)\n")
-
+    separator = "-" * 30
+    countdown_start = 3
+    
     for i, sentence in enumerate(SENTENCES):
         print(f"[{i+1}/{len(SENTENCES)}] PLEASE READ CLEARLY:")
         print(f"\n>>> {sentence} <<<\n")
         
-        countdown_start = 3
         for j in range(countdown_start, 0, -1):
             print(f"Starting in {j}...", end="\r")
             time.sleep(1)
@@ -38,7 +39,7 @@ def record_session():
         write(filename, FS, audio_data)
         
         print(f"Saved: {filename}")
-        print("-" * 30)
+        print(separator)
         
 if __name__ == "__main__":
     try:
