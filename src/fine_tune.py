@@ -7,12 +7,11 @@ Expects: dataset_audio/sentence_X.wav files + dataset_audio/transcriptions.txt
 import os
 import re
 import torch
-import numpy as np
 from dataclasses import dataclass
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 import soundfile as sf
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 from transformers import (
     AutoModelForSpeechSeq2Seq,
@@ -82,9 +81,6 @@ class WhisperAudioDataset(Dataset):
         audio, sr = sf.read(self.audio_paths[idx])
         if audio.ndim > 1:
             audio = audio.mean(axis=1)
-        if sr != SAMPLING_RATE:
-            import librosa
-            audio = librosa.resample(audio, orig_sr=sr, target_sr=SAMPLING_RATE)
 
         input_features = self.processor.feature_extractor(
             audio, sampling_rate=SAMPLING_RATE, return_tensors="pt"
@@ -249,9 +245,6 @@ def transcribe(wav_path: str, adapter_dir: str = OUTPUT_DIR):
     audio, sr = sf.read(wav_path)
     if audio.ndim > 1:
         audio = audio.mean(axis=1)
-    if sr != SAMPLING_RATE:
-        import librosa
-        audio = librosa.resample(audio, orig_sr=sr, target_sr=SAMPLING_RATE)
 
     inputs = processor.feature_extractor(
         audio, sampling_rate=SAMPLING_RATE, return_tensors="pt"
