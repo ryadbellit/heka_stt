@@ -19,6 +19,7 @@ from transformers import (
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
 )
+
 from peft import LoraConfig, get_peft_model, TaskType
 import evaluate
 
@@ -26,7 +27,7 @@ import evaluate
 
 LANGUAGE        = "english"
 MODEL_ID        = "openai/whisper-medium"
-AUDIO_DIR       = "dataset_audio"
+AUDIO_DIR       = "../dataset_audio"
 TRANSCRIPTS_FILE = os.path.join(AUDIO_DIR, "transcriptions.txt")
 OUTPUT_DIR      = "whisper_lora_finetuned"
 SAMPLING_RATE   = 16_000
@@ -56,6 +57,7 @@ def discover_files(audio_dir: str):
         if m:
             entries.append((os.path.join(audio_dir, fname), int(m.group(1))))
     entries.sort(key=lambda x: x[1])
+    print(entries)
     return entries
 
 
@@ -78,7 +80,7 @@ class WhisperAudioDataset(Dataset):
         return len(self.audio_paths)
 
     def __getitem__(self, idx):
-        audio, sr = sf.read(self.audio_paths[idx])
+        audio = sf.read(self.audio_paths[idx])
         if audio.ndim > 1:
             audio = audio.mean(axis=1)
 
@@ -203,12 +205,12 @@ def main():
     )
 
     trainer = Seq2SeqTrainer(
-        model           = model,
-        args            = training_args,
-        train_dataset   = train_dataset,
-        eval_dataset    = eval_dataset,
-        data_collator   = data_collator,
-        compute_metrics = lambda pred: compute_metrics(pred, processor),
+        model            = model,
+        args             = training_args,
+        train_dataset    = train_dataset,
+        eval_dataset     = eval_dataset,
+        data_collator    = data_collator,
+        compute_metrics  = lambda pred: compute_metrics(pred, processor),
         processing_class = processor.feature_extractor,
     )
 
@@ -242,7 +244,7 @@ def transcribe(wav_path: str, adapter_dir: str = OUTPUT_DIR):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
 
-    audio, sr = sf.read(wav_path)
+    audio = sf.read(wav_path)
     if audio.ndim > 1:
         audio = audio.mean(axis=1)
 
