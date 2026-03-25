@@ -5,6 +5,6 @@ with open("phrases.txt", "r", encoding="utf-8") as f:
 
 record_dataset(
     prompts=phrases,
-    duration=10,
+    duration=8,
     frequency=16000
 )
